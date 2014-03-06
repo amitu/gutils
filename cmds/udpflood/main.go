@@ -13,6 +13,7 @@ var (
 	server *string
 	file *string
 	rate *int
+	max *int
 	nuance *int
 )
 
@@ -20,6 +21,7 @@ func main() {
 	server = flag.String("server", "localhost:4443", "Server to flood.")
 	file = flag.String("file", "/dev/stdin", "Content to send to server.")
 	rate = flag.Int("rate", 0, "Max bytes per second to attempt.")
+	max = flag.Int("max", -1, "Number of packets to send.")
 	nuance = flag.Int("nuance", 180000, "Nuance.")
 
 	flag.Parse()
@@ -76,6 +78,13 @@ func main() {
 			)
 			start = now
 			bcount, count = 0, 0
+		}
+
+		if *max > -1 {
+			*max -= 1
+			if *max == 0 {
+				return
+			}
 		}
 	}
 }

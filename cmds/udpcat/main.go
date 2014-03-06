@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"time"
+	"github.com/amitu/gutils"
 )
 
 var (
@@ -59,7 +60,10 @@ func main() {
 			diff := now.Sub(start)
 
 			if diff > 1e9 {
-				fmt.Printf("bps = %d, pps = %d.\n", bcount, count)
+				fmt.Printf(
+					"bps = %sps, pps = %d.\n",
+					gutils.FormatBytes(float64(bcount)), count,
+				)
 				start = now
 				bcount, count = 0, 0
 			}

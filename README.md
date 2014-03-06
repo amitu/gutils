@@ -67,9 +67,14 @@ go get github.com/amitu/gutils/cmds/stdin2redis
 $ stdin2redis -help 
 Usage of udpflood:
   -redis="127.0.0.1:6379": Redis server host:port.
-  -server="127.0.0.1:3334": UDP host:port to listen on.
+  -server="127.0.0.1:4443": UDP host:port to listen on.
+  -drops="/dev/stderr": File to write dropped packets in when redis is down.
 First argument is name of redis list to write packets in.
 ```
+
+At startup redis server must be connectable. If redis goes down while the
+service is running, it will drop UDP packats, and start pushing it to
+redis once it comes back live.
 
 
 

@@ -1,8 +1,12 @@
 package gutils
 
+/* vim: set tabstop=4 */
+
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"errors"
 )
 
 type intraPacket struct {
@@ -17,26 +21,67 @@ type FiledChan struct {
 	intra  chan *intraPacket
 
 	idInFS chan int64 	// latest id writte on disc is available on this channel
-	dir    string 		// in which dir to write droppping files
+	Dir    string 		// in which dir to write droppping files
 }
 
-func (f *FiledChan) Init(cap int64, dir string) {
-	f.Prod 	 = make(chan []byte)
-	f.Cons 	 = make(chan []byte, cap)
-	f.intra  = make(chan *intraPacket, cap)
-	f.idInFS = make(chan int64)
-	f.dir 	 = dir
+func (f *FiledChan) Init(cap int64) error {
+	f.Prod 	 =  make(chan []byte)
+	f.Cons 	 =  make(chan []byte)
+	f.intra  =  make(chan *intraPacket, cap)
+	f.idInFS =  make(chan int64, 1)
+	dir, err := ioutil.TempDir("", "filedchan")
+	if err != nil {
+		return err
+	}
+	f.Dir = dir
+
+	err = f.checkDir()
+	if err != nil {
+		return err
+	}
 
 	go f.goProducer()
 	go f.goConsumer()
+
+	return nil
+}
+
+func (f *FiledChan) Quit() error {
+	return os.RemoveAll(f.Dir)
+}
+
+func (f *FiledChan) checkDir() error {
+	// todo, dir must be writable and empty
+
+	filename := fmt.Sprintf("%s/test.ipacket", f.Dir)
+	err := ioutil.WriteFile(filename, []byte("test"), 0644)
+
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(filename)
+	if err != nil {
+		return err
+	}
+
+	files, err := ioutil.ReadDir(f.Dir)
+	if err != nil {
+		return err
+	}
+
+	if len(files) != 0 {
+		errors.New("Dir is not empty")
+	}
+
+	return nil
 }
 
 func (f *FiledChan) goProducer() {
 	var id int64 = -1
-
 	for {
-		packet := <- f.Prod
 		id += 1  	// we dont care abt id overflow for now, problem?
+		packet := <- f.Prod
 		ipacket := &intraPacket{
 			id: id,
 			packet: packet,
@@ -55,7 +100,6 @@ func (f *FiledChan) goProducer() {
 
 func (f *FiledChan) goConsumer() {
 	idNext := int64(0)
-
 	for {
 		var ipacket *intraPacket
 		var idFromFS int64
@@ -77,7 +121,6 @@ func (f *FiledChan) goConsumer() {
 
 			} else {
 				// all packets till now should be in intra
-
 				for id := idNext; id < idFromFS; id++ {
 
 					// try to read as much as possible from intra
@@ -105,7 +148,6 @@ func (f *FiledChan) goConsumer() {
 			}
 
 		} else {
-
 			// got packet.
 			// packet is either in sequence, or out of sequence
 
@@ -137,7 +179,7 @@ func (f *FiledChan) goConsumer() {
 }
 
 func (f *FiledChan) writeToDisk(ipacket intraPacket) {
-	filename := fmt.Sprintf("%s/%d.ipacket", f.dir, ipacket.id)
+	filename := fmt.Sprintf("%s/%d.ipacket", f.Dir, ipacket.id)
 
 	err := ioutil.WriteFile(filename, ipacket.packet, 0644)
 	if err != nil {
@@ -160,9 +202,14 @@ func (f *FiledChan) writeToDisk(ipacket intraPacket) {
 }
 
 func (f *FiledChan) readPacketFromDisk(id int64) intraPacket {
-	filename := fmt.Sprintf("%s/%d.ipacket", f.dir, id)
+	filename := fmt.Sprintf("%s/%d.ipacket", f.Dir, id)
 
 	packet, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.Remove(filename)
 	if err != nil {
 		panic(err)
 	}

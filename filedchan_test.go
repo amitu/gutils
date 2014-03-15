@@ -4,17 +4,14 @@ import (
 	"testing"
 	"io/ioutil"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 )
 
 func assertDirLength(t *testing.T, n int, dir string) {
 	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 
-	if len(files) != n {
-		t.Errorf("Wrong number of files, expected %d, found %d.", n, files)
-	}
+	assert.Equal(t, len(files), n)
 }
 
 func TestFoo(t *testing.T) {
@@ -23,10 +20,7 @@ func TestFoo(t *testing.T) {
 	err := filedchan.Init(5)
 	defer filedchan.Quit()
 
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.Nil(t, err)
 
 	assertDirLength(t, 0, filedchan.Dir)
 

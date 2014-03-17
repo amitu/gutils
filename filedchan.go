@@ -7,16 +7,17 @@ import (
 	"io/ioutil"
 	"os"
 	"errors"
+	"encoding/gob"
 )
 
 type intraPacket struct {
-	id 	   int64
-	packet []byte
+	ID 	   int64
+	Packet interface{}
 }
 
 type FiledChan struct {
-	Prod   chan []byte 	// produce writes to this channel
-	Cons   chan []byte 	// consumers read from this channel
+	Prod   chan interface{} 	// produce writes to this channel
+	Cons   chan interface{} 	// consumers read from this channel
 
 	intra  chan *intraPacket
 
@@ -25,8 +26,8 @@ type FiledChan struct {
 }
 
 func (f *FiledChan) Init(cap int64) error {
-	f.Prod 	 =  make(chan []byte)
-	f.Cons 	 =  make(chan []byte)
+	f.Prod 	 =  make(chan interface{})
+	f.Cons 	 =  make(chan interface{})
 	f.intra  =  make(chan *intraPacket, cap)
 	f.idInFS =  make(chan int64, 1)
 	dir, err := ioutil.TempDir("", "filedchan")
@@ -83,8 +84,8 @@ func (f *FiledChan) goProducer() {
 		id += 1  	// we dont care abt id overflow for now, problem?
 		packet := <- f.Prod
 		ipacket := &intraPacket{
-			id: id,
-			packet: packet,
+			ID: id,
+			Packet: packet,
 		}
 
 		select {
@@ -116,8 +117,8 @@ func (f *FiledChan) goConsumer() {
 			if idFromFS == idNext {
 
 				fpacket := f.readPacketFromDisk(idFromFS)
-				f.Cons <- fpacket.packet
-				idNext = fpacket.id + 1
+				f.Cons <- fpacket.Packet
+				idNext = fpacket.ID + 1
 
 			} else {
 				// all packets till now should be in intra
@@ -126,8 +127,8 @@ func (f *FiledChan) goConsumer() {
 					// try to read as much as possible from intra
 					select {
 					case ipacket = <- f.intra:
-						f.Cons <- ipacket.packet
-						idNext = ipacket.id + 1
+						f.Cons <- ipacket.Packet
+						idNext = ipacket.ID + 1
 					default:
 						break
 					}
@@ -137,8 +138,8 @@ func (f *FiledChan) goConsumer() {
 				// remaining ones must be on disc
 				for id := idNext; id <= idFromFS; id++ {
 					fpacket2 := f.readPacketFromDisk(id)
-					f.Cons <- fpacket2.packet
-					idNext = fpacket2.id + 1
+					f.Cons <- fpacket2.Packet
+					idNext = fpacket2.ID + 1
 				}
 
 				// we have read everything from intra, and we have a packet
@@ -151,10 +152,10 @@ func (f *FiledChan) goConsumer() {
 			// got packet.
 			// packet is either in sequence, or out of sequence
 
-			if ipacket.id == idNext {
+			if ipacket.ID == idNext {
 
 				// packet is in sequence
-				f.Cons <- ipacket.packet
+				f.Cons <- ipacket.Packet
 				idNext += 1
 
 			} else {
@@ -162,16 +163,16 @@ func (f *FiledChan) goConsumer() {
 				// packet is out of sequence, meaning till this point
 				// everything should be in file
 
-				for id := idNext; id < ipacket.id; id++ {
+				for id := idNext; id < ipacket.ID; id++ {
 					fpacket := f.readPacketFromDisk(id)
-					f.Cons <- fpacket.packet
+					f.Cons <- fpacket.Packet
 				}
 
 				// we have read everything from disk, and we have a packet
 				// so lets send it too
 
-				f.Cons <- ipacket.packet
-				idNext = ipacket.id + 1
+				f.Cons <- ipacket.Packet
+				idNext = ipacket.ID + 1
 
 			}
 		}
@@ -179,15 +180,27 @@ func (f *FiledChan) goConsumer() {
 }
 
 func (f *FiledChan) writeToDisk(ipacket intraPacket) {
-	filename := fmt.Sprintf("%s/%d.ipacket", f.Dir, ipacket.id)
+	filename := fmt.Sprintf("%s/%d.ipacket", f.Dir, ipacket.ID)
 
-	err := ioutil.WriteFile(filename, ipacket.packet, 0644)
+	file, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	enc := gob.NewEncoder(file)
+
+	err = enc.Encode(ipacket)
+	if err != nil {
+		panic(err)
+	}
+
+	err = file.Close()
 	if err != nil {
 		panic(err)
 	}
 
 	select {
-	case f.idInFS <- ipacket.id:
+	case f.idInFS <- ipacket.ID:
 		return
 	default:
 		// there already is something in idInFS, lets try to drain it
@@ -197,14 +210,28 @@ func (f *FiledChan) writeToDisk(ipacket intraPacket) {
 		}
 
 		// finally this one can not block as there is no one else writing to it
-		f.idInFS <- ipacket.id
+		f.idInFS <- ipacket.ID
 	}
 }
 
 func (f *FiledChan) readPacketFromDisk(id int64) intraPacket {
 	filename := fmt.Sprintf("%s/%d.ipacket", f.Dir, id)
 
-	packet, err := ioutil.ReadFile(filename)
+	file, err := os.Open(filename)
+
+	if err != nil {
+		panic(err)
+	}
+
+	dec := gob.NewDecoder(file)
+
+	var ipacket intraPacket
+	err = dec.Decode(&ipacket)
+	if err != nil {
+		panic(err)
+	}
+
+	err = file.Close()
 	if err != nil {
 		panic(err)
 	}
@@ -214,5 +241,5 @@ func (f *FiledChan) readPacketFromDisk(id int64) intraPacket {
 		panic(err)
 	}
 
-	return intraPacket{id: id, packet: packet}
+	return ipacket
 }

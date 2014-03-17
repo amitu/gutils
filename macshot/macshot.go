@@ -51,8 +51,13 @@ Free () {
 	[data release];
 }
 */
-import "C"
+import "C" // Do not merge these imports in one statement
 import "unsafe"
+import "sync"
+
+var (
+	screenshotMutext sync.Mutex
+)
 
 func ScreenShot(quality float64) ([]byte, error) {
 	C.JPEG(C.float(quality))
@@ -61,4 +66,11 @@ func ScreenShot(quality float64) ([]byte, error) {
 	copy(newData, data)
 	C.Free()
 	return newData, nil
+}
+
+func SafeScreenShot(quality float64) ([]byte, error) {
+	screenshotMutext.Lock()
+	defer screenshotMutext.Unlock()
+
+	return ScreenShot(quality)
 }

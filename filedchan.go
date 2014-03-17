@@ -127,8 +127,13 @@ func (f *FiledChan) goConsumer() {
 					// try to read as much as possible from intra
 					select {
 					case ipacket = <- f.intra:
-						f.Cons <- ipacket.Packet
-						idNext = ipacket.ID + 1
+						if ipacket.ID == idNext {
+							f.Cons <- ipacket.Packet
+							idNext = ipacket.ID + 1
+							ipacket = nil
+						} else {
+							break
+						}
 					default:
 						break
 					}
@@ -145,7 +150,11 @@ func (f *FiledChan) goConsumer() {
 				// we have read everything from intra, and we have a packet
 				// so lets send it too
 
-				idNext = idFromFS + 1
+				if ipacket != nil {
+					f.Cons <- ipacket.Packet
+					idNext = ipacket.ID + 1
+					ipacket = nil
+				}
 			}
 
 		} else {

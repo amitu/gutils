@@ -3,10 +3,11 @@ package gutils
 /* vim: set tabstop=4 */
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
+	"fmt"
+	"time"
 	"errors"
+	"io/ioutil"
 	"encoding/gob"
 )
 
@@ -25,11 +26,11 @@ type FiledChan struct {
 	Dir    string 		// in which dir to write droppping files
 }
 
-func (f *FiledChan) Init(cap int64) error {
+func (f *FiledChan) Init(cap, dcap int64) error {
 	f.Prod 	 =  make(chan interface{})
 	f.Cons 	 =  make(chan interface{})
 	f.intra  =  make(chan *intraPacket, cap)
-	f.idInFS =  make(chan int64, 1)
+	f.idInFS =  make(chan int64, dcap + 1)
 	dir, err := ioutil.TempDir("", "filedchan")
 	if err != nil {
 		return err
@@ -90,7 +91,6 @@ func (f *FiledChan) goProducer() {
 
 		select {
 		case f.intra <- ipacket:
-			fmt.Println("Wrote to intra", id)
 			continue
 		default:
 		}
@@ -115,83 +115,64 @@ func (f *FiledChan) goConsumer() {
 
 		if ipacket == nil {
 
-			if idFromFS == idNext {
+			// all packets till now should be in intra
 
-				fpacket := f.readPacketFromDisk(idFromFS)
-				f.Cons <- fpacket.Packet
-				idNext = fpacket.ID + 1
+			for id := idNext; id < idFromFS; id++ {
 
-			} else {
-
-				// all packets till now should be in intra
-				for id := idNext; id < idFromFS; id++ {
-
-					// try to read as much as possible from intra
-					select {
-					case ipacket = <- f.intra:
-						if ipacket.ID == idNext {
-							f.Cons <- ipacket.Packet
-							idNext = ipacket.ID + 1
-							ipacket = nil
-						} else {
-							break
-						}
-					default:
-						break
-					}
-
-				}
-
-				// remaining ones must be on disc
-				for id := idNext; id <= idFromFS; id++ {
-					fpacket2 := f.readPacketFromDisk(id)
-					f.Cons <- fpacket2.Packet
-					idNext = fpacket2.ID + 1
-				}
-
-				// we have read everything from intra, and we have a packet
-				// so lets send it too
-
-				if ipacket != nil {
-					if ipacket.ID != idNext {
+				// try to read as much as possible from intra
+				select {
+				case ipacket = <- f.intra:
+					if idNext != ipacket.ID {
 						panic("logic error")
 					}
 					f.Cons <- ipacket.Packet
 					idNext = ipacket.ID + 1
-					ipacket = nil
+				default:
+					break
 				}
+
+			}
+
+			// we have read everything from intra, and we have a packet
+			// so lets send it too
+
+			if idNext == idFromFS {
+				fpacket := f.readPacketFromDisk(idFromFS)
+				f.Cons <- fpacket.Packet
+				idNext += 1
 			}
 
 		} else {
 			// got packet.
 			// packet is either in sequence, or out of sequence
 
-			if ipacket.ID == idNext {
+			// packet is out of sequence, meaning till this point
+			// everything should be in file
 
-				// packet is in sequence
-				f.Cons <- ipacket.Packet
+			for id := idNext; id < ipacket.ID; id++ {
+				select {
+				case i := <- f.idInFS:
+					if i != idNext {
+						panic("logic error")
+					}
+				case <- time.After(1e8):
+					panic("logic error default")
+				}
+				fpacket := f.readPacketFromDisk(id)
+				f.Cons <- fpacket.Packet
 				idNext += 1
-
-			} else {
-
-				// packet is out of sequence, meaning till this point
-				// everything should be in file
-
-				for id := idNext; id < ipacket.ID; id++ {
-					fpacket := f.readPacketFromDisk(id)
-					f.Cons <- fpacket.Packet
-				}
-
-				// we have read everything from disk, and we have a packet
-				// so lets send it too
-
-				if idNext != ipacket.ID {
-					panic("logic error")
-				}
-				f.Cons <- ipacket.Packet
-				idNext = ipacket.ID + 1
-
 			}
+
+			// we have read everything from disk, and we have a packet
+			// so lets send it too
+
+			if idNext != ipacket.ID {
+				panic("logic error")
+			}
+
+			f.Cons <- ipacket.Packet
+			idNext = ipacket.ID + 1
+
 		}
 	}
 }
@@ -199,7 +180,6 @@ func (f *FiledChan) goConsumer() {
 func (f *FiledChan) writeToDisk(ipacket intraPacket) {
 	gob.Register(S3Upload{})
 	filename := fmt.Sprintf("%s/%d.ipacket", f.Dir, ipacket.ID)
-	fmt.Println("writing to disk", filename)
 	file, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -217,19 +197,7 @@ func (f *FiledChan) writeToDisk(ipacket intraPacket) {
 		panic(err)
 	}
 
-	select {
-	case f.idInFS <- ipacket.ID:
-		return
-	default:
-		// there already is something in idInFS, lets try to drain it
-		select {
-		case <- f.idInFS:
-		default:
-		}
-
-		// finally this one can not block as there is no one else writing to it
-		f.idInFS <- ipacket.ID
-	}
+	f.idInFS <- ipacket.ID
 }
 
 func (f *FiledChan) readPacketFromDisk(id int64) intraPacket {
@@ -259,6 +227,5 @@ func (f *FiledChan) readPacketFromDisk(id int64) intraPacket {
 		panic(err)
 	}
 
-	fmt.Println("read from disk", filename)
 	return ipacket
 }

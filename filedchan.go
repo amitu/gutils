@@ -90,6 +90,7 @@ func (f *FiledChan) goProducer() {
 
 		select {
 		case f.intra <- ipacket:
+			fmt.Println("Wrote to intra", id)
 			continue
 		default:
 		}
@@ -121,6 +122,7 @@ func (f *FiledChan) goConsumer() {
 				idNext = fpacket.ID + 1
 
 			} else {
+
 				// all packets till now should be in intra
 				for id := idNext; id < idFromFS; id++ {
 
@@ -151,6 +153,9 @@ func (f *FiledChan) goConsumer() {
 				// so lets send it too
 
 				if ipacket != nil {
+					if ipacket.ID != idNext {
+						panic("logic error")
+					}
 					f.Cons <- ipacket.Packet
 					idNext = ipacket.ID + 1
 					ipacket = nil
@@ -180,6 +185,9 @@ func (f *FiledChan) goConsumer() {
 				// we have read everything from disk, and we have a packet
 				// so lets send it too
 
+				if idNext != ipacket.ID {
+					panic("logic error")
+				}
 				f.Cons <- ipacket.Packet
 				idNext = ipacket.ID + 1
 
@@ -189,8 +197,9 @@ func (f *FiledChan) goConsumer() {
 }
 
 func (f *FiledChan) writeToDisk(ipacket intraPacket) {
+	gob.Register(S3Upload{})
 	filename := fmt.Sprintf("%s/%d.ipacket", f.Dir, ipacket.ID)
-
+	fmt.Println("writing to disk", filename)
 	file, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -250,5 +259,6 @@ func (f *FiledChan) readPacketFromDisk(id int64) intraPacket {
 		panic(err)
 	}
 
+	fmt.Println("read from disk", filename)
 	return ipacket
 }

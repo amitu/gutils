@@ -4,7 +4,11 @@
 
 package gutils
 
-import "fmt"
+import (
+	"os"
+	"fmt"
+	"strings"
+)
 
 const (
 	_           = iota // ignore first value by assigning to blank identifier
@@ -38,4 +42,9 @@ func FormatBytes(b float64) string {
 		return fmt.Sprintf("%.2fKB", b/KB)
 	}
 	return fmt.Sprintf("%.2fB", b)
+}
+
+func BinaryName() string {
+	parts := strings.Split(os.Args[0], "/")
+	return parts[len(parts)-1]
 }

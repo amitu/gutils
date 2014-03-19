@@ -1,6 +1,7 @@
 package gutils
 
 import (
+	"os"
 	"io"
 	"fmt"
 	"flag"

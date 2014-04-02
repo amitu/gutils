@@ -25,6 +25,7 @@ type S3Upload struct {
 	// path within the bucket
 	Path string
 	ACL string
+	Tries int
 }
 
 var (

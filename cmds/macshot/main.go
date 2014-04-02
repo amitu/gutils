@@ -39,6 +39,11 @@ func main() {
 			delta, *iterations * 1e9 / int(delta), usedDisk,
 		)
 	} else {
+		if filename == "" {
+			fmt.Println("Filename required.")
+			return
+		}
+
 		jpeg, err := macshot.ScreenShot(*quality)
 		if err != nil {
 			fmt.Println(err)

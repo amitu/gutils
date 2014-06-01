@@ -48,3 +48,6 @@ func BinaryName() string {
 	parts := strings.Split(os.Args[0], "/")
 	return parts[len(parts)-1]
 }
+
+// TODO: TimeSinceHuman(from, anchor time.Time, pre, post string) string
+// eg [2 hrs ago/in 2 hrs] (time is compared with anchor, nil means time.Now())

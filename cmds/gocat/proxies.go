@@ -31,7 +31,7 @@ type Proxy struct {
 func (p *Proxy) Parse() error {
 	parts1 := strings.Split(p.Spec, "@")
 	if len(parts1) != 2 {
-		return errors.New("Wrong number of parts")
+		parts1 = strings.Split("tcp@" + p.Spec, "@")
 	}
 
 	parts2 := strings.Split(parts1[1], "->")

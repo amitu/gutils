@@ -49,6 +49,8 @@ func (f *FiledChan) Init(cap, dcap int64) error {
 }
 
 func (f *FiledChan) Quit() error {
+	// TODO: convert it to Close()
+	// implement proper close semantics
 	return os.RemoveAll(f.Dir)
 }
 

@@ -3,6 +3,7 @@ package gutils
 import (
 	"os"
 	"io"
+	"log"
 	"fmt"
 	"flag"
 	"sync"
@@ -142,6 +143,7 @@ func UploadToS3(upload S3Upload, client http.Client) error {
 		return err
 	}
 
+	log.Println("gutils.S3: Uploaded " + url)
 	return nil
 }
 

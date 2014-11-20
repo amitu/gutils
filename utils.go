@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	_           = iota // ignore first value by assigning to blank identifier
+	_          = iota // ignore first value by assigning to blank identifier
 	KB float64 = 1 << (10 * iota)
 	MB
 	GB

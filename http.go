@@ -1,10 +1,27 @@
 package gutils
 
 import (
-	"net/http"
-	"time"
 	"fmt"
+	"time"
+	"net"
+	"net/http"
 )
+
+func LimitedListenAndServe(addr string, handler http.Handler, limit int) error {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	// server := &http.Server{ Handler: handler, DisableGoRoutines: true }
+	server := &http.Server{ Handler: handler }
+
+	for i := 0; i < limit; i++ {
+		go server.Serve(listener)
+	}
+
+	return nil
+}
 
 type TimeoutTransport struct {
 	http.Transport
@@ -36,7 +53,7 @@ func (t *TimeoutTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	}()
  
 	select {
-	case <-timeout:// A round trip timeout has occurred.
+	case <-timeout: // A round trip timeout has occurred.
 		t.Transport.CancelRequest(req)
 		return nil, NetTimeoutError{
 			error: fmt.Errorf("timed out after %s", t.RoundTripTimeout),

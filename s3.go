@@ -40,11 +40,11 @@ var (
 )
 
 const (
-	S3ACLPrivate 				string = "private"
-	S3ACLPublicRead 			string = "public-read"
-	S3ACLPublicReadWrite 		string = "public-read-write"
-	S3ACLAuthenticatedRead 		string = "authenticated-read"
-	S3ACLBucketOwnerRead 		string = "bucket-owner-read"
+	S3ACLPrivate                string = "private"
+	S3ACLPublicRead             string = "public-read"
+	S3ACLPublicReadWrite        string = "public-read-write"
+	S3ACLAuthenticatedRead      string = "authenticated-read"
+	S3ACLBucketOwnerRead        string = "bucket-owner-read"
 	S3ACLBucketOwnerFullControl string = "bucket-owner-full-control"
 )
 
@@ -54,16 +54,16 @@ func InitS3 (n int) {
 	// on whatever, eg config file
 	flag.IntVar(&S3Workers, "s3workers", n, "Number of S3 uploaders.")
 	s3keys = s3.Keys{
-	    AccessKey: os.Getenv("S3_ACCESS_KEY"),
-	    SecretKey: os.Getenv("S3_SECRET_KEY"),
+		AccessKey: os.Getenv("S3_ACCESS_KEY"),
+		SecretKey: os.Getenv("S3_SECRET_KEY"),
 	}
 }
 
 func InitS3WithKeys (n int, access, secret string) {
 	InitS3(n)
 	s3keys = s3.Keys{
-	    AccessKey: access,
-	    SecretKey: secret,
+		AccessKey: access,
+		SecretKey: secret,
 	}
 }
 

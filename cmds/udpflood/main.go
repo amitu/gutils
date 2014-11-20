@@ -36,7 +36,7 @@ func main() {
 	conn, err := net.DialTimeout("udp", *server, 1e9)
 
 	if err != nil {
-		fmt.Println("Error establishing connection to host: %s\n", err)
+		fmt.Printf("Error establishing connection to host: %s\n", err)
 		return
 	}
 

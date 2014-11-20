@@ -12,7 +12,7 @@ import (
 )
 
 type intraPacket struct {
-	ID 	   int64
+	ID     int64
 	Packet interface{}
 }
 
@@ -27,8 +27,8 @@ type FiledChan struct {
 }
 
 func (f *FiledChan) Init(cap, dcap int64) error {
-	f.Prod 	 =  make(chan interface{})
-	f.Cons 	 =  make(chan interface{})
+	f.Prod   =  make(chan interface{})
+	f.Cons   =  make(chan interface{})
 	f.intra  =  make(chan *intraPacket, cap)
 	f.idInFS =  make(chan int64, dcap + 1)
 	dir, err := ioutil.TempDir("", "filedchan")

@@ -7,11 +7,9 @@ package macshot
 #import <Foundation/Foundation.h>
 
 NSData *data;
-// NSAutoreleasePool *pool;
 
 void
 JPEG(float quality) {
-	// pool = [[NSAutoreleasePool alloc] init];
 	CGImageRef image = CGDisplayCreateImage(kCGDirectMainDisplay);
 	CFMutableDataRef mutableData = CFDataCreateMutable(NULL, 0);
 	CGImageDestinationRef idst = CGImageDestinationCreateWithData(
@@ -51,15 +49,17 @@ Data() {
 void
 Free () {
 	[data release];
-	// [pool drain];
 }
 */
-import "C" // Do not merge these imports in one statement
-import "unsafe"
-import "sync"
+import "C"
+
+import (
+	"sync"
+	"unsafe"
+)
 
 var (
-	screenshotMutext sync.Mutex
+	mutext sync.Mutex
 )
 
 func ScreenShot(quality float64) ([]byte, error) {
@@ -72,8 +72,8 @@ func ScreenShot(quality float64) ([]byte, error) {
 }
 
 func SafeScreenShot(quality float64) ([]byte, error) {
-	screenshotMutext.Lock()
-	defer screenshotMutext.Unlock()
+	mutext.Lock()
+	defer mutext.Unlock()
 
 	return ScreenShot(quality)
 }

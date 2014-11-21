@@ -261,3 +261,25 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, err, Empty)
 	assert.Equal(t, v, nil)
 }
+
+func TestCircularBufferArray(t *testing.T) {
+	circ := NewCircularBufferArray(10)
+
+	assert.Equal(
+		t, circ.Dump(), "CircularArray {size: 10, start: 0, end: 0, buffer: []}",
+	)
+
+	assert.Equal(t, circ.Capacity(), 10)
+	assert.Equal(t, circ.Length(), 0)
+
+	circ.Push([]byte("foo"))
+	v, err := circ.Pop()
+
+	assert.Equal(t, []byte("foo"), v)
+	assert.Equal(t, nil, err)
+
+	v, err = circ.Pop()
+
+	assert.Equal(t, []byte(nil), v)
+	assert.Equal(t, Empty, err)
+}

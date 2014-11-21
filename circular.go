@@ -11,92 +11,92 @@ var (
 )
 
 type CircularArray struct {
-	size       uint
-	buffer     []interface{}
-	start, end uint
+	Size       uint
+	Buffer     []interface{}
+	Start, End uint
 }
 
 func NewCircularArray(size uint) *CircularArray {
-	return &CircularArray{size: size, start: 0, end: 0}
+	return &CircularArray{Size: size}
 }
 
 func (circ *CircularArray) Capacity() uint {
-	return circ.size
+	return circ.Size
 }
 
 func (circ *CircularArray) Length() uint {
-	return circ.end - circ.start
+	return circ.End - circ.Start
 }
 
 func (circ *CircularArray) Push(val interface{}) {
 	if circ.Length() == circ.Capacity() {
-		circ.start += 1
+		circ.Start += 1
 	}
 
-	circ.end += 1
+	circ.End += 1
 
-	if len(circ.buffer) == int(circ.size) {
-		circ.buffer[circ.end%circ.size-1] = val
+	if len(circ.Buffer) == int(circ.Size) {
+		circ.Buffer[circ.End%circ.Size-1] = val
 	} else {
-		circ.buffer = append(circ.buffer, val)
+		circ.Buffer = append(circ.Buffer, val)
 	}
 }
 
 func (circ *CircularArray) Pop() (interface{}, error) {
-	if circ.start == circ.end {
+	if circ.Start == circ.End {
 		return nil, Empty
 	}
-	circ.start += 1
-	return circ.buffer[(circ.start-1)%circ.size], nil
+	circ.Start += 1
+	return circ.Buffer[(circ.Start-1)%circ.Size], nil
 }
 
 func (circ *CircularArray) PopNewest() (interface{}, error) {
-	if circ.start == circ.end {
+	if circ.Start == circ.End {
 		return nil, Empty
 	}
-	if circ.end-circ.start == 1 {
-		circ.start += 1
-		return circ.buffer[(circ.start)%circ.size-1], nil
+	if circ.End-circ.Start == 1 {
+		circ.Start += 1
+		return circ.Buffer[(circ.Start)%circ.Size-1], nil
 	} else {
-		circ.end -= 1
-		return circ.buffer[(circ.end+1)%circ.size-1], nil
+		circ.End -= 1
+		return circ.Buffer[(circ.End+1)%circ.Size-1], nil
 	}
 }
 
 func (circ *CircularArray) PeekOldest() (interface{}, error) {
-	if circ.start == circ.end {
+	if circ.Start == circ.End {
 		return nil, Empty
 	}
 
-	return circ.buffer[circ.start%circ.size], nil
+	return circ.Buffer[circ.Start%circ.Size], nil
 }
 
 func (circ *CircularArray) PeekNewest() (interface{}, error) {
-	if circ.start == circ.end {
+	if circ.Start == circ.End {
 		return nil, Empty
 	}
 
-	return circ.buffer[circ.end%circ.size-1], nil
+	return circ.Buffer[circ.End%circ.Size-1], nil
 }
 
 func (circ *CircularArray) Ith(i uint) (interface{}, error) {
-	if circ.start == circ.end {
+	if circ.Start == circ.End {
 		return nil, Empty
 	}
 
-	ti := i + circ.start
+	ti := i + circ.Start
 
-	if ti >= circ.end {
+	if ti >= circ.End {
 		return nil, IndexOutOfBounds
 	}
 
-	return circ.buffer[ti%circ.size], nil
+	return circ.Buffer[ti%circ.Size], nil
 }
 
 func (circ *CircularArray) Dump() string {
 	return fmt.Sprintf(
 		"CircularArray {size: %d, start: %d, end: %d, buffer: %v}",
-		circ.size, circ.start, circ.end, circ.buffer,
+		circ.Size, circ.Start, circ.End, circ.Buffer,
 	)
 }
 

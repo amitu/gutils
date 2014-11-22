@@ -33,13 +33,13 @@ func (circ *CircularArray) Push(val interface{}) {
 		circ.Start += 1
 	}
 
-	circ.End += 1
-
-	if len(circ.Buffer) == int(circ.Size) {
-		circ.Buffer[circ.End%circ.Size-1] = val
+	if len(circ.Buffer) == int(circ.Size) || len(circ.Buffer) > int(circ.End) {
+		circ.Buffer[circ.End%circ.Size] = val
 	} else {
 		circ.Buffer = append(circ.Buffer, val)
 	}
+
+	circ.End += 1
 }
 
 func (circ *CircularArray) Pop() (interface{}, error) {
@@ -54,13 +54,8 @@ func (circ *CircularArray) PopNewest() (interface{}, error) {
 	if circ.Start == circ.End {
 		return nil, Empty
 	}
-	if circ.End-circ.Start == 1 {
-		circ.Start += 1
-		return circ.Buffer[(circ.Start)%circ.Size-1], nil
-	} else {
-		circ.End -= 1
-		return circ.Buffer[(circ.End+1)%circ.Size-1], nil
-	}
+	circ.End -= 1
+	return circ.Buffer[circ.End%circ.Size], nil
 }
 
 func (circ *CircularArray) PeekOldest() (interface{}, error) {

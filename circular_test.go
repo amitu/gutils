@@ -1,10 +1,8 @@
 package gutils
 
 import (
-	// "fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	// "time"
 )
 
 func TestCircularArray(t *testing.T) {
@@ -92,55 +90,55 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 10)
 	assert.Equal(
-		t, "CircularArray {size: 10, start: 1, end: 1, buffer: [10]}",
+		t, "CircularArray {size: 10, start: 0, end: 0, buffer: [10]}",
 		circ.Dump(),
 	)
 
 	circ.Push(20)
 
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 1, end: 2, buffer: [10 20]}",
+		t, "CircularArray {size: 10, start: 0, end: 1, buffer: [20]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.PeekNewest()
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 20)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 1, end: 2, buffer: [10 20]}",
+		t, "CircularArray {size: 10, start: 0, end: 1, buffer: [20]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.PeekOldest()
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 20)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 1, end: 2, buffer: [10 20]}",
+		t, "CircularArray {size: 10, start: 0, end: 1, buffer: [20]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Ith(0)
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 20)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 1, end: 2, buffer: [10 20]}",
+		t, "CircularArray {size: 10, start: 0, end: 1, buffer: [20]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Ith(1)
 	assert.Equal(t, err, IndexOutOfBounds)
 	assert.Equal(t, v, nil)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 1, end: 2, buffer: [10 20]}",
+		t, "CircularArray {size: 10, start: 0, end: 1, buffer: [20]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Pop()
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 20)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 2, end: 2, buffer: [10 20]}",
+		t, "CircularArray {size: 10, start: 1, end: 1, buffer: [20]}",
+		circ.Dump(),
 	)
 
 	circ.Push(30)
@@ -156,16 +154,18 @@ func TestCircularArray(t *testing.T) {
 	circ.Push(40)
 
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 3, end: 13, buffer: [38 39 40 31 32 33 34 35 36 37]}",
+		t,
+		"CircularArray {size: 10, start: 2, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Pop()
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 31)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 4, end: 13, buffer: [38 39 40 31 32 33 34 35 36 37]}",
+		t,
+		"CircularArray {size: 10, start: 3, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	circ.Pop() // 32
@@ -182,16 +182,18 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 40)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 13, buffer: [38 39 40 31 32 33 34 35 36 37]}",
+		t,
+		"CircularArray {size: 10, start: 12, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Pop()
 	assert.Equal(t, err, Empty)
 	assert.Equal(t, v, nil)
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 13, buffer: [38 39 40 31 32 33 34 35 36 37]}",
+		t,
+		"CircularArray {size: 10, start: 12, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	circ.Push(50)
@@ -200,24 +202,22 @@ func TestCircularArray(t *testing.T) {
 	circ.Push(53)
 
 	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 17, buffer: [38 39 40 50 51 52 53 35 36 37]}",
+		t,
+		"CircularArray {size: 10, start: 12, end: 16, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.PopNewest()
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 53)
-	assert.Equal(
-		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 16, buffer: [38 39 40 50 51 52 53 35 36 37]}",
-	)
 
 	v, err = circ.PeekNewest()
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 52)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 16, buffer: [38 39 40 50 51 52 53 35 36 37]}",
+		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.PeekOldest()
@@ -225,7 +225,8 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 50)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 16, buffer: [38 39 40 50 51 52 53 35 36 37]}",
+		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Ith(0)
@@ -233,7 +234,8 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 50)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 16, buffer: [38 39 40 50 51 52 53 35 36 37]}",
+		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Ith(2)
@@ -241,7 +243,8 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 52)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 16, buffer: [38 39 40 50 51 52 53 35 36 37]}",
+		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	v, err = circ.Ith(3)
@@ -249,7 +252,8 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, nil)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 13, end: 16, buffer: [38 39 40 50 51 52 53 35 36 37]}",
+		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		circ.Dump(),
 	)
 
 	circ.PopNewest()
@@ -260,6 +264,22 @@ func TestCircularArray(t *testing.T) {
 	v, err = circ.PopNewest()
 	assert.Equal(t, err, Empty)
 	assert.Equal(t, v, nil)
+
+	for i := 100; i < 200; i++ {
+		circ.Push(i)
+	}
+
+	assert.Equal(t, 10, circ.Length())
+
+	for i := 199; i >= 190; i-- {
+		v, err = circ.PopNewest()
+		assert.Equal(t, nil, err)
+		assert.Equal(t, i, v)
+	}
+
+	v, err = circ.PopNewest()
+	assert.Equal(t, Empty, err)
+	assert.Equal(t, nil, v)
 }
 
 func TestCircularBufferArray(t *testing.T) {

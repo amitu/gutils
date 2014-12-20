@@ -1,18 +1,18 @@
 package gutils
 
 import (
-	"os"
-	"io"
-	"log"
-	"fmt"
-	"flag"
-	"sync"
-	"time"
 	"bytes"
 	"errors"
-	"net/http"
-	"io/ioutil"
+	"flag"
+	"fmt"
 	"github.com/kr/s3"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"sync"
+	"time"
 )
 
 type S3UploadContext interface {
@@ -21,16 +21,16 @@ type S3UploadContext interface {
 
 type S3Upload struct {
 	// if passed this will be uploaded
-	Content  []byte
+	Content []byte
 	// either content of file name must be passed
 	FileName string
 	// s3 bucket, can be left empty if default bucket is set
 	Bucket   string
 	MimeType string
 	// path within the bucket
-	Path     string
-	ACL      string
-	Context  S3UploadContext
+	Path    string
+	ACL     string
+	Context S3UploadContext
 }
 
 var (
@@ -48,7 +48,7 @@ const (
 	S3ACLBucketOwnerFullControl string = "bucket-owner-full-control"
 )
 
-func InitS3 (n int) {
+func InitS3(n int) {
 	// TODO: probably command line flag should not be set by a library like
 	// this and should be relied on application to set number of workers based
 	// on whatever, eg config file
@@ -59,7 +59,7 @@ func InitS3 (n int) {
 	}
 }
 
-func InitS3WithKeys (n int, access, secret string) {
+func InitS3WithKeys(n int, access, secret string) {
 	InitS3(n)
 	s3keys = s3.Keys{
 		AccessKey: access,
@@ -67,7 +67,7 @@ func InitS3WithKeys (n int, access, secret string) {
 	}
 }
 
-func StartS3Uploaders (work chan interface{}) {
+func StartS3Uploaders(work chan interface{}) {
 
 	client := http.Client{
 		Transport: &http.Transport{
@@ -78,7 +78,7 @@ func StartS3Uploaders (work chan interface{}) {
 	for i := 0; i < S3Workers; i++ {
 		go func() {
 			for {
-				job, found := <- work
+				job, found := <-work
 				if !found {
 					// Channel closed
 					s3wg.Done()
@@ -120,6 +120,13 @@ func UploadToS3(upload S3Upload, client http.Client) error {
 	if upload.MimeType != "" {
 		req.Header.Set("Content-Type", upload.MimeType)
 	}
+
+	// S3 does not support keep alive, and yet does not send "Connection: Close"
+	// header as it should. I *think* in absence of this, go keeps the connection
+	// half open. And one server we found a lot of connections in closed state,
+	// leading to fd leak.
+	req.Header.Set("Connection", "Close")
+
 	s3.Sign(req, s3keys)
 
 	res, err := http.DefaultClient.Do(req)

@@ -1,5 +1,7 @@
 # gutils: Utilities for go
 
+[![Join the chat at https://gitter.im/amitu/gutils](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/amitu/gutils?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## udpcat
 
 This utility listens on a UDP host:port, and prints whatever it receives 

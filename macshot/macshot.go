@@ -98,11 +98,17 @@ func SafeScreenShot(quality float64) ([]byte, error) {
 
 func Raw() (data []byte, width, height, stride int, err error) {
 	C.Raw()
+	// data = (*[1 << 30]byte)(unsafe.Pointer(C.Data()))[0:C.Length()]
+	// newData := make([]byte, C.Length())
+	// copy(newData, data)
+	// C.Free()
+	// return newData, int(C.width), int(C.height), int(C.stride), nil
 	data = (*[1 << 30]byte)(unsafe.Pointer(C.Data()))[0:C.Length()]
-	newData := make([]byte, C.Length())
-	copy(newData, data)
+	return data, int(C.width), int(C.height), int(C.stride), nil
+}
+
+func Clean() {
 	C.Free()
-	return newData, int(C.width), int(C.height), int(C.stride), nil
 }
 
 /*

@@ -1,1 +1,5 @@
 .DS_Store
+*.exe
+cmds/gocat/gocat
+cmds/macshot/macshot
+cmds/udpcat/udpcat

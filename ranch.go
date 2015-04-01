@@ -1,28 +1,28 @@
 package gutils
 
 import (
-	"io"
-	"net"
-	"fmt"
-	"time"
-	"sync"
 	"bufio"
 	"errors"
+	"fmt"
+	"io"
+	"net"
 	"net/http"
+	"sync"
+	"time"
 )
 
 type RanchServer struct {
-	Network string
-	HostPort string
+	Network     string
+	HostPort    string
 	Concurrancy int
-	HTTP bool
-	Handler func(net.Conn)
+	HTTP        bool
+	Handler     func(net.Conn)
 	HTTPHandler func(http.Request, net.Conn)
-	listener net.Listener
-	wg sync.WaitGroup
+	listener    net.Listener
+	wg          sync.WaitGroup
 }
 
-func (s *RanchServer) Start () error {
+func (s *RanchServer) Start() error {
 	fmt.Println("start", s)
 
 	if s.listener != nil {
@@ -53,7 +53,7 @@ func (s *RanchServer) Start () error {
 	return nil
 }
 
-func (s *RanchServer) Stop () error {
+func (s *RanchServer) Stop() error {
 	if s.listener == nil {
 		return errors.New("Server not running.")
 	}
@@ -97,7 +97,7 @@ func (s *RanchServer) worker() {
 				continue
 			}
 
-			fmt.Printf("ranch: error during accept,", e)
+			fmt.Println("ranch: error during accept,", e)
 			// log the error and shut down the listener?
 			s.wg.Done()
 		}

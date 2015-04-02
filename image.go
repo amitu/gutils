@@ -3,6 +3,7 @@ package gutils
 import (
 	"image"
 	"image/color"
+	// "fmt"
 )
 
 // MacBGRA is used to represent the image obtained from OS X screenbuffer.
@@ -39,4 +40,21 @@ func (m *WinBGRA) At(x, y int) color.Color {
 // NewWinBGRA returns a WinBGRA object with given pixel data
 func NewWinBGRA(r image.Rectangle, stride int, pix []byte) *WinBGRA {
 	return &WinBGRA{RGBA: image.RGBA{Pix: pix, Stride: stride, Rect: r}}
+}
+
+func ConvertWinBGRAToRGBA(w, h, stride int, data []byte) *image.RGBA {
+	m := image.NewRGBA(image.Rect(0, 0, w, h))
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			base := y*w*4+x 
+			dbase := (h-y-1)*stride + x
+			// fmt.Println(len(data), w, h, stride, x, y, base, dbase)
+			m.Pix[base] = data[dbase]
+			m.Pix[base+1] = data[dbase+2]
+			m.Pix[base+2] = data[dbase+1]
+			m.Pix[base+3] = data[dbase+3]
+			// fmt.Println(x, y, base, dbase)
+		}
+	}
+	return m
 }

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
-	"image/jpeg"
+	"image/png"
 	"log"
 	"os"
 	"runtime/pprof"
@@ -33,25 +34,22 @@ func main() {
 
 	if *benchmark {
 		start := time.Now()
+		b := gutils.Screenshot().Bounds()
+		buf := make([]byte, b.Dx()*b.Dy()*4)
+		w := bytes.NewBuffer(buf)
 		for i := 0; i < *iterations; i++ {
 			m := gutils.Screenshot()
 			if filename != "" {
-				f, err := os.Create(filename)
-				if err != nil {
-					fmt.Println("Benchmark failed:", err)
-					return
-				}
+				// f, err := os.Create(filename)
+				// if err != nil {
+				// 	fmt.Println("Benchmark failed:", err)
+				// 	return
+				// }
 				start := time.Now()
-				// png.Encode(f, m)
-				for y := m.Bounds().Dy() - 1; y > 0; y-- {
-					for x := m.Bounds().Dx() - 1; x > 0; x-- {
-						c := m.At(x, y)
-						c.RGBA()
-					}
-				}
+				// jpeg.Encode(w, m, nil)
+				png.Encode(w, m)
 				fmt.Println(time.Since(start))
-				f.Close()
-				gutils.CleanUpCleaningUpMacBGRA(m.(*gutils.CleaningUpMacBGRA))
+				// f.Close()
 			}
 		}
 		delta := time.Now().Sub(start)
@@ -72,7 +70,7 @@ func main() {
 			fmt.Println("Benchmark failed:", err)
 			return
 		}
-		jpeg.Encode(f, m, nil)
+		png.Encode(f, m)
 		f.Close()
 	}
 }

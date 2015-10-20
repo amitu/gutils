@@ -12,8 +12,8 @@ func TestCircularArray(t *testing.T) {
 		t, circ.Dump(), "CircularArray {size: 10, start: 0, end: 0, buffer: []}",
 	)
 
-	assert.Equal(t, circ.Capacity(), 10)
-	assert.Equal(t, circ.Length(), 0)
+	assert.Equal(t, circ.Capacity(), uint(10))
+	assert.Equal(t, circ.Length(), uint(0))
 
 	v, err := circ.Pop()
 	assert.Equal(t, err, Empty)
@@ -259,7 +259,7 @@ func TestCircularArray(t *testing.T) {
 	circ.PopNewest()
 	circ.PopNewest()
 	circ.PopNewest()
-	assert.Equal(t, 0, circ.Length())
+	assert.Equal(t, uint(0), circ.Length())
 
 	v, err = circ.PopNewest()
 	assert.Equal(t, err, Empty)
@@ -269,7 +269,7 @@ func TestCircularArray(t *testing.T) {
 		circ.Push(i)
 	}
 
-	assert.Equal(t, 10, circ.Length())
+	assert.Equal(t, uint(10), circ.Length())
 
 	for i := 199; i >= 190; i-- {
 		v, err = circ.PopNewest()
@@ -289,8 +289,8 @@ func TestCircularBufferArray(t *testing.T) {
 		t, circ.Dump(), "CircularArray {size: 10, start: 0, end: 0, buffer: []}",
 	)
 
-	assert.Equal(t, circ.Capacity(), 10)
-	assert.Equal(t, circ.Length(), 0)
+	assert.Equal(t, circ.Capacity(), uint(10))
+	assert.Equal(t, circ.Length(), uint(0))
 
 	circ.Push([]byte("foo"))
 	v, err := circ.Pop()

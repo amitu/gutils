@@ -71,7 +71,7 @@ func (circ *CircularArray) PeekNewest() (interface{}, error) {
 		return nil, Empty
 	}
 
-	return circ.Buffer[circ.End%circ.Size-1], nil
+	return circ.Buffer[(circ.End-1)%circ.Size], nil
 }
 
 func (circ *CircularArray) Ith(i uint) (interface{}, error) {

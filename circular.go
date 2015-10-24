@@ -28,8 +28,13 @@ func (circ *CircularArray) Length() uint {
 	return circ.End - circ.Start
 }
 
-func (circ *CircularArray) Push(val interface{}) {
+func (circ *CircularArray) Push(val interface{}) (interface{}, bool) {
+	dropped := false
+	var obj interface{} = nil
+
 	if circ.Length() == circ.Capacity() {
+		dropped = true
+		obj = circ.Buffer[circ.Start]
 		circ.Start += 1
 	}
 
@@ -40,6 +45,8 @@ func (circ *CircularArray) Push(val interface{}) {
 	}
 
 	circ.End += 1
+
+	return obj, dropped
 }
 
 func (circ *CircularArray) Pop() (interface{}, error) {

@@ -80,7 +80,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 10)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 1, end: 1, buffer: [10]}",
+		"CircularArray {size: 10, start: 0, end: 0, buffer: []}",
 	)
 
 	circ = NewCircularArray(10)
@@ -90,7 +90,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 10)
 	assert.Equal(
-		t, "CircularArray {size: 10, start: 0, end: 0, buffer: [10]}",
+		t, "CircularArray {size: 10, start: 0, end: 0, buffer: []}",
 		circ.Dump(),
 	)
 
@@ -137,7 +137,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, v, 20)
 	assert.Equal(
-		t, "CircularArray {size: 10, start: 1, end: 1, buffer: [20]}",
+		t, "CircularArray {size: 10, start: 0, end: 0, buffer: []}",
 		circ.Dump(),
 	)
 
@@ -155,7 +155,7 @@ func TestCircularArray(t *testing.T) {
 
 	assert.Equal(
 		t,
-		"CircularArray {size: 10, start: 2, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		"CircularArray {size: 10, start: 1, end: 11, buffer: [40 31 32 33 34 35 36 37 38 39]}",
 		circ.Dump(),
 	)
 
@@ -164,7 +164,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 31)
 	assert.Equal(
 		t,
-		"CircularArray {size: 10, start: 3, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		"CircularArray {size: 10, start: 2, end: 11, buffer: [40 31 32 33 34 35 36 37 38 39]}",
 		circ.Dump(),
 	)
 
@@ -183,7 +183,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 40)
 	assert.Equal(
 		t,
-		"CircularArray {size: 10, start: 12, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 0, buffer: []}",
 		circ.Dump(),
 	)
 
@@ -192,7 +192,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, nil)
 	assert.Equal(
 		t,
-		"CircularArray {size: 10, start: 12, end: 12, buffer: [39 40 31 32 33 34 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 0, buffer: []}",
 		circ.Dump(),
 	)
 
@@ -203,7 +203,7 @@ func TestCircularArray(t *testing.T) {
 
 	assert.Equal(
 		t,
-		"CircularArray {size: 10, start: 12, end: 16, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 4, buffer: [50 51 52 53]}",
 		circ.Dump(),
 	)
 
@@ -216,7 +216,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 52)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 3, buffer: [50 51 52 53]}",
 		circ.Dump(),
 	)
 
@@ -225,7 +225,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 50)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 3, buffer: [50 51 52 53]}",
 		circ.Dump(),
 	)
 
@@ -234,7 +234,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 50)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 3, buffer: [50 51 52 53]}",
 		circ.Dump(),
 	)
 
@@ -243,7 +243,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, 52)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 3, buffer: [50 51 52 53]}",
 		circ.Dump(),
 	)
 
@@ -252,7 +252,7 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, nil)
 	assert.Equal(
 		t, circ.Dump(),
-		"CircularArray {size: 10, start: 12, end: 15, buffer: [39 40 50 51 52 53 35 36 37 38]}",
+		"CircularArray {size: 10, start: 0, end: 3, buffer: [50 51 52 53]}",
 		circ.Dump(),
 	)
 

@@ -40,7 +40,7 @@ func (circ *CircularArray) Push(val interface{}) (interface{}, bool) {
 
 	if circ.Length() == circ.Capacity() {
 		dropped = true
-		obj = circ.Buffer[circ.Start]
+		obj = circ.Buffer[circ.End%circ.Size]
 		circ.Start += 1
 	}
 

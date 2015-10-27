@@ -20,6 +20,12 @@ func NewCircularArray(size uint) *CircularArray {
 	return &CircularArray{Size: size}
 }
 
+func (circ *CircularArray) Empty() {
+	circ.Buffer = nil
+	circ.Start = 0
+	circ.End = 0
+}
+
 func (circ *CircularArray) Capacity() uint {
 	return circ.Size
 }
@@ -54,7 +60,13 @@ func (circ *CircularArray) Pop() (interface{}, error) {
 		return nil, Empty
 	}
 	circ.Start += 1
-	return circ.Buffer[(circ.Start-1)%circ.Size], nil
+	last := circ.Buffer[(circ.Start-1)%circ.Size]
+
+	if circ.Length() == 0 {
+		circ.Empty()
+	}
+
+	return last, nil
 }
 
 func (circ *CircularArray) PopNewest() (interface{}, error) {
@@ -62,7 +74,13 @@ func (circ *CircularArray) PopNewest() (interface{}, error) {
 		return nil, Empty
 	}
 	circ.End -= 1
-	return circ.Buffer[circ.End%circ.Size], nil
+	last := circ.Buffer[circ.End%circ.Size]
+
+	if circ.Length() == 0 {
+		circ.Empty()
+	}
+
+	return last, nil
 }
 
 func (circ *CircularArray) PeekOldest() (interface{}, error) {

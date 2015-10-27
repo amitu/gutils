@@ -3,6 +3,7 @@ package gutils
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"fmt"
 )
 
 func TestCircularArray(t *testing.T) {
@@ -36,12 +37,13 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, v, nil)
 
 	// one element in the array
-	circ.Push(10)
-
+	o, d := circ.Push(10)
 	assert.Equal(
 		t, circ.Dump(),
 		"CircularArray {size: 10, start: 0, end: 1, buffer: [10]}",
 	)
+	assert.Nil(t, o)
+	assert.False(t, d)
 
 	v, err = circ.PeekNewest()
 	assert.Equal(t, err, nil)
@@ -84,7 +86,9 @@ func TestCircularArray(t *testing.T) {
 	)
 
 	circ = NewCircularArray(10)
-	circ.Push(10)
+	o, d = circ.Push(10)
+	assert.Nil(t, o)
+	assert.False(t, d)
 
 	v, err = circ.PopNewest()
 	assert.Equal(t, err, nil)
@@ -94,7 +98,9 @@ func TestCircularArray(t *testing.T) {
 		circ.Dump(),
 	)
 
-	circ.Push(20)
+	o, d = circ.Push(20)
+	assert.Nil(t, o)
+	assert.False(t, d)
 
 	assert.Equal(
 		t, "CircularArray {size: 10, start: 0, end: 1, buffer: [20]}",
@@ -141,17 +147,49 @@ func TestCircularArray(t *testing.T) {
 		circ.Dump(),
 	)
 
-	circ.Push(30)
-	circ.Push(31)
-	circ.Push(32)
-	circ.Push(33)
-	circ.Push(34)
-	circ.Push(35)
-	circ.Push(36)
-	circ.Push(37)
-	circ.Push(38)
-	circ.Push(39)
-	circ.Push(40)
+	o, d  = circ.Push(30)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(31)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(32)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(33)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(34)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(35)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(36)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(37)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(38)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(39)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d  = circ.Push(40)
+	assert.Equal(t, o, 30)
+	assert.True(t, d)
 
 	assert.Equal(
 		t,
@@ -196,10 +234,21 @@ func TestCircularArray(t *testing.T) {
 		circ.Dump(),
 	)
 
-	circ.Push(50)
-	circ.Push(51)
-	circ.Push(52)
-	circ.Push(53)
+	o, d = circ.Push(50)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d = circ.Push(51)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d = circ.Push(52)
+	assert.Nil(t, o)
+	assert.False(t, d)
+
+	o, d = circ.Push(53)
+	assert.Nil(t, o)
+	assert.False(t, d)
 
 	assert.Equal(
 		t,
@@ -265,8 +314,17 @@ func TestCircularArray(t *testing.T) {
 	assert.Equal(t, err, Empty)
 	assert.Equal(t, v, nil)
 
-	for i := 100; i < 200; i++ {
-		circ.Push(i)
+	for i := 100; i < 110; i++ {
+		o, d := circ.Push(i)
+		assert.Nil(t, o)
+		assert.False(t, d)
+	}
+
+	for i := 110; i < 200; i++ {
+		o, d := circ.Push(i)
+		fmt.Println(i, o.(int), int(i-10))
+		assert.Equal(t, o.(int), int(i-10))
+		assert.True(t, d)
 	}
 
 	assert.Equal(t, uint(10), circ.Length())
@@ -292,7 +350,10 @@ func TestCircularBufferArray(t *testing.T) {
 	assert.Equal(t, circ.Capacity(), uint(10))
 	assert.Equal(t, circ.Length(), uint(0))
 
-	circ.Push([]byte("foo"))
+	o, d := circ.Push([]byte("foo"))
+	assert.Nil(t, o)
+	assert.False(t, d)
+
 	v, err := circ.Pop()
 
 	assert.Equal(t, []byte("foo"), v)
